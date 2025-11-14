@@ -58,4 +58,4 @@ jobs:
         with:
           artifacts: build/app/outputs/flutter-apk/app-release.apk
           tag: v${{ github.run_number }}
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.Mac-Store-User }}
