@@ -17,45 +17,58 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Checkout repository
+      # 1️⃣ Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # Setup Java
+      # 2️⃣ Setup Java 19
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: zulu
           java-version: '19'
 
-      # Setup Flutter
+      # 3️⃣ Setup Flutter 3.38
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.38.0'
           channel: stable
+          architecture: x64
 
-      # Install dependencies
+      # 4️⃣ Install dependencies
       - name: Install dependencies
         run: flutter pub get
 
-      # Build release APK (unsigned)
-      - name: Build APK
-        run: flutter build apk --release
+      # 5️⃣ Optional: Create a dummy key.properties (unsigned APK)
+      #    Only needed if you want a signed APK for testing
+      # - name: Create key.properties
+      #   run: |
+      #     echo "storePassword=123456" >> android/key.properties
+      #     echo "keyPassword=123456" >> android/key.properties
+      #     echo "keyAlias=keyTest" >> android/key.properties
+      #     echo "storeFile=android/test.jks" >> android/key.properties
 
-      # Upload APK artifact
-      - name: Upload APK
+      # 6️⃣ Build APK for all ABIs (unsigned is fine for CI/CD testing)
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+
+      # 7️⃣ Upload APK artifacts
+      - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: flutter-apks
+          path: build/app/outputs/flutter-apk/*.apk
 
-      # Create GitHub Release
+      # 8️⃣ Create GitHub Release
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: build/app/outputs/flutter-apk/app-release.apk
+          artifacts: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
           tag: v${{ github.run_number }}
-          token: ${{ secrets.Mac-Store-User }}
+          token: ${{ secrets.Test_CICD }}  # Make sure this is a PAT with repo access
