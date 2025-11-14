@@ -71,4 +71,5 @@ jobs:
             build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
             build/app/outputs/flutter-apk/app-x86_64-release.apk
           tag: v${{ github.run_number }}
-          token: ${{ secrets.Test_CICD }}  # Make sure this is a PAT with repo access
+          token: ${{ secrets.Mac_store }}  # THIS must exist and be correct
+
